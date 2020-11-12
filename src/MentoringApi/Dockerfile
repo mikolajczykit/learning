@@ -13,6 +13,7 @@ RUN dotnet restore "MentoringApi.csproj"
 COPY . .
 
 RUN dotnet build "MentoringApi.csproj" -c Release -o /app/build
+RUN dotnet test
 RUN dotnet publish "MentoringApi.csproj" -c Release -o /app/publish
 
 FROM base AS run
