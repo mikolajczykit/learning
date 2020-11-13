@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Formatting.Json;
 
 namespace MentoringApi
 {
@@ -13,6 +15,12 @@ namespace MentoringApi
     {
         public static void Main(string[] args)
         {
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.File(@"C:\logs\log.txt", rollingInterval: RollingInterval.Day)
+                .WriteTo.Debug()
+                .CreateLogger();
+
             CreateHostBuilder(args).Build().Run();
         }
 

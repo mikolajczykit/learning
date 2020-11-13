@@ -1,6 +1,4 @@
 using MentoringApi.Controllers;
-using Microsoft.Extensions.Logging;
-using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +11,9 @@ namespace MentoringApi.Tests
         [Fact]
         public void VerifyIfForecastDateIsBetweenFiveDaysTimeSpan()
         {
-            Mock<ILogger<WeatherForecastController>> loggerMock = new Mock<ILogger<WeatherForecastController>>();
+            //Mock<ILogger<WeatherForecastController>> loggerMock = new Mock<ILogger<WeatherForecastController>>();
 
-            WeatherForecastController controller = new WeatherForecastController(loggerMock.Object);
+            WeatherForecastController controller = new WeatherForecastController();
             IEnumerable<WeatherForecast> result = controller.Get();
             
             DateTime maxDateScope = DateTime.Now.AddDays(5);

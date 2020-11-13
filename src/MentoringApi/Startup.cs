@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MentoringApi.Models;
+using MentoringCore.Middlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
@@ -14,6 +15,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Serilog;
+using Serilog.Formatting.Json;
 
 namespace MentoringApi
 {
@@ -45,6 +48,8 @@ namespace MentoringApi
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseMiddleware<LoggingMiddleware>();
+
             app.UseHttpsRedirection();
 
             app.UseRouting();
@@ -72,6 +77,9 @@ namespace MentoringApi
                         }),
                         HealthCheckDuration = report.TotalDuration
                     };
+
+                    Log.Information($"healthChecks executed with result: {JsonConvert.SerializeObject(response)}");
+
                     await context.Response.WriteAsync(JsonConvert.SerializeObject(response));
                 }
             });

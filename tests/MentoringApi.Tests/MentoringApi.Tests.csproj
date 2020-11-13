@@ -1,11 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-
     <IsPackable>false</IsPackable>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <ProjectGuid>{C1AF0DFE-31C5-4A4A-B4B9-EC13445ECA03}</ProjectGuid>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
     <PackageReference Include="Moq" Version="4.15.1" />
@@ -13,9 +16,10 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
     <PackageReference Include="coverlet.collector" Version="1.0.1" />
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\..\src\MentoringApi\MentoringApi.csproj" />
+    <ProjectReference Include="..\..\src\MentoringApi\MentoringApi.csproj">
+      <Project>{35f11ea3-027c-405c-bac2-e008f742d6cc}</Project>
+      <Name>MentoringApi</Name>
+    </ProjectReference>
   </ItemGroup>
-
 </Project>
