@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Serilog;
 using Newtonsoft.Json;
 using MentoringCore.Assets;
+using Microsoft.Extensions.Configuration;
 
 namespace MentoringCore.Middlewares
 {
@@ -11,12 +12,14 @@ namespace MentoringCore.Middlewares
     {
         private readonly RequestDelegate next;
         private readonly ILogger Logger;
-        public LoggingMiddleware(RequestDelegate next)
+
+        public LoggingMiddleware(RequestDelegate next, IConfiguration configuration)
         {
             this.next = next;
+            string logsLocation = $"{configuration.GetValue<string>("Logging:LogsLocation")}requests.txt";
             this.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
-                .WriteTo.File(@"C:\logs\requests.txt", rollingInterval: RollingInterval.Day)
+                .WriteTo.File(@logsLocation, rollingInterval: RollingInterval.Day)
                 .CreateLogger();
         }
 

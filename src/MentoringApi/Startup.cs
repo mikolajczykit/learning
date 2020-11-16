@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MentoringApi.Models;
+using MentoringCore.Extensions;
 using MentoringCore.Middlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -48,7 +49,7 @@ namespace MentoringApi
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseMiddleware<LoggingMiddleware>();
+            app.UseLoggingMiddleware();
 
             app.UseHttpsRedirection();
 

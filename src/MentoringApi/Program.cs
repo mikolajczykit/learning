@@ -15,9 +15,14 @@ namespace MentoringApi
     {
         public static void Main(string[] args)
         {
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            string logsLocation = $"{configuration.GetValue<string>("Logging:LogsLocation")}log.txt";
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
-                .WriteTo.File(@"C:\logs\log.txt", rollingInterval: RollingInterval.Day)
+                .WriteTo.File(@logsLocation, rollingInterval: RollingInterval.Day)
                 .WriteTo.Debug()
                 .CreateLogger();
 
