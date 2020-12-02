@@ -1,0 +1,84 @@
+﻿@model UploadFileViewModel
+@{
+    ViewData["Title"] = "Upload File";
+}
+<div class="text-center">
+    <form asp-controller="UploadFile" asp-action="UploadFile" method="post" enctype="multipart/form-data">
+        <label asp-for="@Model.File"></label>
+        <input asp-for="@Model.File" />
+        <input type="button" id="submit" value="Submit" />
+        <input type="button" id="cancel" value="Cancel" />
+    </form>
+    <div id="progressbar-container" style="display:none">
+        <label for="fileprogress">Uploading Progress:</label>
+        <progress id="fileprogress" value="0" max="100"> 0% </progress>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var guid;
+    function bindEvents() {
+        $('#submit').on('click', formSubmit);
+        $('#cancel').on('click', cancelUpload);
+    }
+
+    function showProgressBar() {
+        $('#progressbar-container').show();
+    }
+
+    function formSubmit() {
+        guid = (new Date()).getTime();
+        showProgressBar();
+
+        var form = $(this).closest('form');
+        var formAction = form.attr("action");
+        var formData = new FormData();
+
+        var fileInput = $('#File')[0];
+        var file = fileInput.files[0];
+        formData.append("File", file);
+        formData.append("guid", guid)
+        startProgressBar();
+
+        $.ajax({
+            type: 'post',
+            url: formAction,
+            data: formData,
+            processData: false,
+            contentType: false
+        }).done(function (result) {
+            stopProgressBar();
+            alert(result.message);
+        });
+    }
+
+    var intervalId;
+
+    function startProgressBar() {
+      $("#progressbar-container").show();
+
+      intervalId = setInterval(
+        function () {
+              $.post("@Url.Action("Progress", "UploadFile")", function (progress) {
+                $("#fileprogress").val(progress);
+                $("#fileprogress").html(progress + "%");
+            });
+        }, 10);
+    }
+
+    function cancelUpload() {
+        stopProgressBar();
+
+        $.post("@Url.Action("Cancel", "UploadFile")", { guid: guid }, function () {
+            stopProgressBar();
+        });
+    }
+
+    function stopProgressBar() {
+      clearInterval(intervalId);
+    }
+
+    $(function () {
+        bindEvents();
+    });
+</script>
