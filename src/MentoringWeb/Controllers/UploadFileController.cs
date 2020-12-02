@@ -8,6 +8,8 @@ using Microsoft.Extensions.Logging;
 using MentoringWeb.Models;
 using System.IO;
 using System.Threading;
+using Microsoft.AspNetCore.SignalR;
+using MentoringWeb.Hubs;
 
 namespace MentoringWeb.Controllers
 {
@@ -15,10 +17,12 @@ namespace MentoringWeb.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private static Dictionary<string, CancellationTokenSource> CancellationTokens = new Dictionary<string, CancellationTokenSource>();
+        private IProgressBar _progressBar;
 
-        public UploadFileController(ILogger<HomeController> logger)
+        public UploadFileController(ILogger<HomeController> logger, IProgressBar _progressBar)
         {
             this._logger = logger;
+            this._progressBar = _progressBar;
         }
 
         public IActionResult Index()
@@ -33,7 +37,7 @@ namespace MentoringWeb.Controllers
             CancellationTokens.Add(guid, cancellationToken);
 
             string result = "Data Uploaded Successfully!";
-            ProgressBar.Progress = 0;
+            this._progressBar.SetProgressAsync(0);
 
             long totalSize = viewModel.File.Length;
 
@@ -61,7 +65,7 @@ namespace MentoringWeb.Controllers
                                 await output.WriteAsync(buffer, 0, readBytes);
                                 this._logger.LogInformation($"After await: {Thread.CurrentThread.ManagedThreadId.ToString()}");
                                 totalReadBytes += readBytes;
-                                ProgressBar.Progress = (int)((float)totalReadBytes / (float)totalSize * 100.0);
+                                await this._progressBar.SetProgressAsync((int)((float)totalReadBytes / (float)totalSize * 100.0));
                                 await Task.Delay(10);
                             }
                         }

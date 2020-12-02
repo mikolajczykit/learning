@@ -48,12 +48,12 @@
             processData: false,
             contentType: false
         }).done(function (result) {
-            clearInterval(intervalId);
+            //clearInterval(intervalId);
             connection.stop();
             alert(result.message);
         });
 
-        intervalId = setInterval(function () { connection.invoke("SendProgress"); }, 10);
+        //intervalId = setInterval(function () { connection.invoke("SendProgress"); }, 10);
 
         var connection = new signalR.HubConnectionBuilder().withUrl("/progress").build(); 
         

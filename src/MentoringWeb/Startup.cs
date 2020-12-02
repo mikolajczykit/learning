@@ -26,6 +26,7 @@ namespace MentoringWeb
         {
             services.AddControllersWithViews();
             services.AddSignalR();
+            services.AddSingleton<IProgressBar, ProgressBar>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
