@@ -18,13 +18,55 @@
 <script type="text/javascript">
     var guid;
     function bindEvents() {
-        $('#submit').on('click', formSubmit);
+        $('#submit').on('click', formSubmitSignalR);
         $('#cancel').on('click', cancelUpload);
     }
 
     function showProgressBar() {
         $('#progressbar-container').show();
     }
+
+    function formSubmitSignalR() {
+        guid = (new Date()).getTime();
+        showProgressBar();
+
+        var form = $(this).closest('form');
+        var formAction = form.attr("action");
+        var formData = new FormData();
+
+        var fileInput = $('#File')[0];
+        var file = fileInput.files[0];
+        formData.append("File", file);
+        formData.append("guid", guid);
+
+        var connection = new signalR.HubConnectionBuilder().withUrl("/progress").build(); 
+
+        $.ajax({
+            type: 'post',
+            url: formAction,
+            data: formData,
+            processData: false,
+            contentType: false
+        }).done(function (result) {
+            clearInterval(intervalId);
+            connection.stop();
+            alert(result.message);
+        });
+
+        intervalId = setInterval(function () { connection.invoke("SendProgress"); }, 10);
+
+        var connection = new signalR.HubConnectionBuilder().withUrl("/progress").build(); 
+        
+        connection.start().then(() => {
+            //connection.invoke("SendProgress");
+            connection.on("ReceiveProgress", function (progress) {  
+                document.getElementById('fileprogress').innerHTML = progress;
+                document.getElementById('fileprogress').value = progress;
+            });
+        });
+    }
+
+
 
     function formSubmit() {
         guid = (new Date()).getTime();
@@ -37,7 +79,7 @@
         var fileInput = $('#File')[0];
         var file = fileInput.files[0];
         formData.append("File", file);
-        formData.append("guid", guid)
+        formData.append("guid", guid);
         startProgressBar();
 
         $.ajax({
