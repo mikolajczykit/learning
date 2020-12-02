@@ -9,14 +9,5 @@ namespace MentoringWeb.Hubs
 {
     public class ProgressbarHub : Hub
     {
-        //public async Task SendProgress() 
-        //{
-        //    await Clients.All.SendAsync("ReceiveProgress", ProgressBar.Progress);
-        //}
-
-        public async Task SendProgressToListener() 
-        {
-            await Clients.All.SendAsync("ReceiveProgress", ProgressBar.Progress);
-        }
     }
 }
