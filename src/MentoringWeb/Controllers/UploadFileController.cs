@@ -37,7 +37,8 @@ namespace MentoringWeb.Controllers
             CancellationTokens.Add(guid, cancellationToken);
 
             string result = "Data Uploaded Successfully!";
-            this._progressBar.SetProgressAsync(0);
+
+            await this._progressBar.SetProgressAsync(0);
 
             long totalSize = viewModel.File.Length;
 
@@ -65,7 +66,10 @@ namespace MentoringWeb.Controllers
                                 await output.WriteAsync(buffer, 0, readBytes);
                                 this._logger.LogInformation($"After await: {Thread.CurrentThread.ManagedThreadId.ToString()}");
                                 totalReadBytes += readBytes;
+
                                 await this._progressBar.SetProgressAsync((int)((float)totalReadBytes / (float)totalSize * 100.0));
+                                
+                                // to slow down progress bar
                                 await Task.Delay(10);
                             }
                         }

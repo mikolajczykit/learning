@@ -16,111 +16,135 @@
 </div>
 
 <script type="text/javascript">
-    var guid;
-    function bindEvents() {
-        $('#submit').on('click', formSubmitSignalR);
-        $('#cancel').on('click', cancelUpload);
-    }
+    var signalRModule = function () {
+        var guid;
+        var formSubmitSignalR = function () {
+            guid = (new Date()).getTime();
+            showProgressBar();
 
-    function showProgressBar() {
-        $('#progressbar-container').show();
-    }
+            var form = $(this).closest('form');
+            var formAction = form.attr("action");
+            var formData = new FormData();
 
-    function formSubmitSignalR() {
-        guid = (new Date()).getTime();
-        showProgressBar();
+            var fileInput = $('#File')[0];
+            var file = fileInput.files[0];
+            formData.append("File", file);
+            formData.append("guid", guid);
 
-        var form = $(this).closest('form');
-        var formAction = form.attr("action");
-        var formData = new FormData();
+            var connection = new signalR.HubConnectionBuilder().withUrl("/progress").build();
 
-        var fileInput = $('#File')[0];
-        var file = fileInput.files[0];
-        formData.append("File", file);
-        formData.append("guid", guid);
-
-        var connection = new signalR.HubConnectionBuilder().withUrl("/progress").build(); 
-
-        $.ajax({
-            type: 'post',
-            url: formAction,
-            data: formData,
-            processData: false,
-            contentType: false
-        }).done(function (result) {
-            //clearInterval(intervalId);
-            connection.stop();
-            alert(result.message);
-        });
-
-        //intervalId = setInterval(function () { connection.invoke("SendProgress"); }, 10);
-
-        var connection = new signalR.HubConnectionBuilder().withUrl("/progress").build(); 
-        
-        connection.start().then(() => {
-            //connection.invoke("SendProgress");
-            connection.on("ReceiveProgress", function (progress) {  
-                document.getElementById('fileprogress').innerHTML = progress;
-                document.getElementById('fileprogress').value = progress;
+            $.ajax({
+                type: 'post',
+                url: formAction,
+                data: formData,
+                processData: false,
+                contentType: false
+            }).done(function (result) {
+                //clearInterval(intervalId);
+                connection.stop();
+                alert(result.message);
             });
-        });
-    }
 
+            //intervalId = setInterval(function () { connection.invoke("SendProgress"); }, 10);
 
+            var connection = new signalR.HubConnectionBuilder().withUrl("/progress").build();
 
-    function formSubmit() {
-        guid = (new Date()).getTime();
-        showProgressBar();
-
-        var form = $(this).closest('form');
-        var formAction = form.attr("action");
-        var formData = new FormData();
-
-        var fileInput = $('#File')[0];
-        var file = fileInput.files[0];
-        formData.append("File", file);
-        formData.append("guid", guid);
-        startProgressBar();
-
-        $.ajax({
-            type: 'post',
-            url: formAction,
-            data: formData,
-            processData: false,
-            contentType: false
-        }).done(function (result) {
-            stopProgressBar();
-            alert(result.message);
-        });
-    }
-
-    var intervalId;
-
-    function startProgressBar() {
-      $("#progressbar-container").show();
-
-      intervalId = setInterval(
-        function () {
-              $.post("@Url.Action("Progress", "UploadFile")", function (progress) {
-                $("#fileprogress").val(progress);
-                $("#fileprogress").html(progress + "%");
+            connection.start().then(() => {
+                //connection.invoke("SendProgress");
+                connection.on("ReceiveProgress", function (progress) {
+                    document.getElementById('fileprogress').innerHTML = progress;
+                    document.getElementById('fileprogress').value = progress;
+                });
             });
-        }, 10);
-    }
+        }
 
-    function cancelUpload() {
-        stopProgressBar();
+        function cancelUpload() {
+            $.post("@Url.Action("Cancel", "UploadFile")", { guid: guid });
+        }
 
-        $.post("@Url.Action("Cancel", "UploadFile")", { guid: guid }, function () {
-            stopProgressBar();
-        });
-    }
+        function showProgressBar() {
+            $('#progressbar-container').show();
+        }
 
-    function stopProgressBar() {
-      clearInterval(intervalId);
-    }
+        return {
+            formSubmitSignalR: formSubmitSignalR,
+            cancelUpload: cancelUpload
+        }
+    }();
+    var manualModule = function () {
+        var guid;
+        var intervalId;
+
+        function showProgressBar() {
+            $('#progressbar-container').show();
+        }
+
+        function cancelUpload() {
+            $.post("@Url.Action("Cancel", "UploadFile")", { guid: guid }, function () {
+                stopProgressBar();
+            });
+        }
+
+        function stopProgressBar() {
+          clearInterval(intervalId);
+        }
+
+        function startProgressBar() {
+          $("#progressbar-container").show();
+
+          intervalId = setInterval(
+            function () {
+                  $.post("@Url.Action("Progress", "UploadFile")", function (progress) {
+                    $("#fileprogress").val(progress);
+                    $("#fileprogress").html(progress + "%");
+                });
+            }, 10);
+        }
+
+        var formSubmit = function () {
+            guid = (new Date()).getTime();
+            showProgressBar();
+
+            var form = $(this).closest('form');
+            var formAction = form.attr("action");
+            var formData = new FormData();
+
+            var fileInput = $('#File')[0];
+            var file = fileInput.files[0];
+            formData.append("File", file);
+            formData.append("guid", guid);
+            startProgressBar();
+
+            $.ajax({
+                type: 'post',
+                url: formAction,
+                data: formData,
+                processData: false,
+                contentType: false
+            }).done(function (result) {
+                stopProgressBar();
+                alert(result.message);
+            });
+        }
+
+        return {
+            formSubmit: formSubmit,
+            cancelUpload: cancelUpload
+        }
+    }();
+
+    var generalModule = function () {
+        var bindEvents = function () {
+            $('#submit').on('click', signalRModule.formSubmitSignalR);
+            $('#cancel').on('click', signalRModule.cancelUpload);
+        }
+
+        return {
+            bindEvents: bindEvents
+        }
+    }();
 
     $(function () {
-        bindEvents();
+        generalModule.bindEvents();
     });
 </script>

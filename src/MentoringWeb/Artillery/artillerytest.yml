@@ -1,0 +1,9 @@
+﻿config:
+  target: 'http://localhost:61821'
+  phases:
+    - duration: 20
+      arrivalRate: 20
+scenarios:
+  - flow:
+    - get:
+        url: "/UploadFile"
